@@ -1,0 +1,90 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: tictactoe-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=tictactoe_user
+      - POSTGRES_PASSWORD=tictactoe_pass
+      - POSTGRES_DB=tictactoe_auth_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - tictactoe-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U tictactoe_user -d tictactoe_auth_db" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:8-alpine
+    container_name: tictactoe-redis
+    restart: unless-stopped
+    command: redis-server --requirepass tictactoe_redis_pass --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - tictactoe-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "tictactoe_redis_pass", "ping" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  rabbitmq:
+    image: rabbitmq:4.3.0-rc.0-management-alpine
+    container_name: tictactoe-rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=tictactoe_user
+      - RABBITMQ_DEFAULT_PASS=tictactoe_pass
+      - RABBITMQ_DEFAULT_VHOST=tictactoe
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - tictactoe-network
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  consul:
+    image: hashicorp/consul:1.22
+    container_name: tictactoe-consul
+    restart: unless-stopped
+    command: >
+      consul agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -bind=0.0.0.0 -data-dir=/consul/data
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    networks:
+      - tictactoe-network
+    healthcheck:
+      test: [ "CMD", "consul", "members" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+
+
+networks:
+  tictactoe-network:
+    driver: bridge
