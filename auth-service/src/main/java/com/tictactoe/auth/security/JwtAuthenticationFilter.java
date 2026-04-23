@@ -10,6 +10,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.tictactoe.auth.service.TokenBlocklistService;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
+	private final TokenBlocklistService tokenBlocklistService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -39,6 +42,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		if (!jwtUtil.validateToken(token)) {
 			log.debug("Invalid JWT token for request: {}", request.getRequestURI());
+			filterChain.doFilter(request, response);
+			return;
+		}
+
+		String jti = jwtUtil.extractJti(token);
+		if (tokenBlocklistService.isTokenBlocked(jti)) {
+			log.debug("Blocklisted token used: jti={}", jti);
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -60,7 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 					authorities);
 
 			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-			
+
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 
