@@ -1,1 +1,66 @@
-.vscode
+# IDE and Editor
+.vscode/
+.idea/
+*.iml
+.classpath
+.factorypath
+.project
+.settings/
+
+# Build artifacts
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+
+# Maven
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+.flattened-pom.xml
+
+# Gradle (if used)
+.gradle/
+build/
+*.gradle
+
+# Node (if used)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment and configuration
+.env
+.env.local
+.env.*.local
+application-local.properties
+application-dev.properties
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.h2.db
+
+# Temporary files
+*.tmp
+.cache/
