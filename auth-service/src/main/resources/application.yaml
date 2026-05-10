@@ -3,7 +3,7 @@ spring:
     name: auth-service
 
   datasource:
-    url: jdbc:postgresql://postgres:5432/tictactoe_auth_db
+    url: jdbc:postgresql://localhost:5432/tictactoe_auth_db
     username: tictactoe_user
     password: tictactoe_pass
     driver-class-name: org.postgresql.Driver
@@ -19,7 +19,6 @@ spring:
 
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: true
         format_sql: true
 
@@ -27,7 +26,7 @@ spring:
 
   data:
     redis:
-      host: redis
+      host: localhost
       port: 6379
       password: tictactoe_redis_pass
 
@@ -39,11 +38,13 @@ spring:
 
   cloud:
     consul:
-      host: consul
+      host: localhost
       port: 8500
 
       discovery:
         service-name: auth-service
+        hostname: host.docker.internal
+        health-check-path: /auth/actuator/health
 
 server:
   port: 8081

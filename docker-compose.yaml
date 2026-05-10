@@ -38,6 +38,15 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+  
+  redisinsight:
+    image: redis/redisinsight:3.4
+    container_name: tictactoe-redis-insight
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    networks:
+      - tictactoe-network
 
   rabbitmq:
     image: rabbitmq:4.3.0-rc.0-management-alpine
