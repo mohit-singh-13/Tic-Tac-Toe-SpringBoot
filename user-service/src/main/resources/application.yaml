@@ -1,0 +1,66 @@
+server:
+  port: 8082
+
+  servlet:
+    context-path: /users
+
+spring:
+  application:
+    name: user-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tictactoe_game_db
+    username: tictactoe_user
+    password: tictactoe_pass
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: tictactoe_user
+    password: tictactoe_pass
+    virtual-host: tictactoe
+    listener:
+      simple:
+        acknowledge-mode: manual
+
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+        health-check-path: /users/actuator/health
+        health-check-interval: 10s
+        instance-id: ${spring.application.name}-${server.port}
+        hostname: host.docker.internal
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+        show-details: always
+
+logging:
+  level:
+    com.tictactoe.user: DEBUG
+    org.springframework.amqp: INFO
+    org.springframework.security: INFO
